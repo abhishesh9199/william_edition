@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - EduLearn</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">📚 EduLearn</div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <div class="form-container" style="max-width: 600px;">
+            <h2 data-i18n="checkout_title">Checkout</h2>
+
+            <div id="checkoutError" class="hidden"></div>
+
+            <div style="background: #f5f5f5; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h3>Order Details</h3>
+                <div style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                    <span data-i18n="checkout_course">Course</span>
+                    <span id="courseName">Loading...</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                    <span data-i18n="checkout_amount">Amount</span>
+                    <span id="courseAmount">₹0</span>
+                </div>
+                <hr style="margin: 1rem 0;">
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem;">
+                    <span>Total</span>
+                    <span id="totalAmount">₹0</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="initiatePayment()" style="width: 100%; margin-bottom: 1rem;"
+                data-i18n="checkout_pay">
+                Pay with Razorpay
+            </button>
+
+            <button class="btn-secondary" onclick="cancelCheckout()" style="width: 100%;">
+                Cancel
+            </button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 EduLearn. All rights reserved.</p>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        checkAuth();
+
+        const paymentId = new URLSearchParams(window.location.search).get('payment');
+
+        async function loadPaymentDetails() {
+            if (!paymentId) {
+                showMessage('Invalid payment', 'error');
+                setTimeout(() => window.location.href = 'courses.html', 2000);
+                return;
+            }
+
+            try {
+                const response = await apiCall(`/payment/${paymentId}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (response) {
+                    document.getElementById('courseAmount').textContent = `₹${response.amount}`;
+                    document.getElementById('totalAmount').textContent = `₹${response.amount}`;
+                    document.getElementById('courseName').textContent = `Course #${response.course_id}`;
+                }
+            } catch (error) {
+                console.error('Error loading payment details:', error);
+            }
+        }
+
+        async function initiatePayment() {
+            try {
+                const paymentDetails = await apiCall(`/payment/${paymentId}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!paymentDetails) {
+                    showMessage('Error loading payment details', 'error');
+                    return;
+                }
+
+                const options = {
+                    key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Razorpay Key ID
+                    amount: paymentDetails.amount * 100,
+                    currency: "INR",
+                    name: "EduLearn",
+                    description: `Course #${paymentDetails.course_id}`,
+                    order_id: paymentDetails.razorpay_order_id,
+                    handler: async function (response) {
+                        await verifyPayment(response);
+                    },
+                    prefill: {
+                        email: getCurrentUser()?.email || "",
+                    },
+                    theme: {
+                        color: "#667eea"
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            showMessage('Payment cancelled', 'error');
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                console.error('Error initiating payment:', error);
+                showMessage('Error processing payment', 'error');
+            }
+        }
+
+        async function verifyPayment(razorpayResponse) {
+            try {
+                const response = await apiCall('/payment/verify', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({
+                        razorpay_order_id: razorpayResponse.razorpay_order_id,
+                        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+                        razorpay_signature: razorpayResponse.razorpay_signature
+                    })
+                });
+
+                if (response) {
+                    showMessage('Payment successful! Course enrolled.');
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                }
+            } catch (error) {
+                console.error('Error verifying payment:', error);
+                showMessage('Payment verification failed', 'error');
+            }
+        }
+
+        function cancelCheckout() {
+            window.location.href = 'courses.html';
+        }
+
+        window.addEventListener('load', () => {
+            loadPaymentDetails();
+            translatePage();
+        });
+    </script>
+</body>
+</html>

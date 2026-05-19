@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EduLearn</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">📚 EduLearn</div>
+            <div class="language-toggle">
+                <button class="btn-outline" onclick="changeLanguage('en')">EN</button>
+                <button class="btn-outline" onclick="changeLanguage('hi')">HI</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="form-container">
+            <div id="loginForm">
+                <h2 data-i18n="login_title">Welcome Back</h2>
+                <div id="loginError"></div>
+
+                <div class="form-group">
+                    <label data-i18n="login_email">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="login_password">Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+
+                <button class="btn-primary" style="width: 100%; margin-bottom: 1rem;"
+                    onclick="handleLogin()" data-i18n="login_button">
+                    Login
+                </button>
+
+                <p style="text-align: center;">
+                    <a href="#" onclick="toggleForms()" data-i18n="login_signup_link">
+                        Don't have an account? Sign up
+                    </a>
+                </p>
+            </div>
+
+            <div id="signupForm" class="hidden">
+                <h2 data-i18n="signup_title">Create Account</h2>
+                <div id="signupError"></div>
+
+                <div class="form-group">
+                    <label data-i18n="signup_firstname">First Name</label>
+                    <input type="text" id="signupFirstName" placeholder="John">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="signup_lastname">Last Name</label>
+                    <input type="text" id="signupLastName" placeholder="Doe">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="login_email">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="signup_phone">Phone Number</label>
+                    <input type="tel" id="signupPhone" placeholder="+91 XXXXXXXXXX">
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="signup_password">Password</label>
+                    <input type="password" id="signupPassword" placeholder="••••••••">
+                </div>
+
+                <button class="btn-primary" style="width: 100%; margin-bottom: 1rem;"
+                    onclick="handleSignup()" data-i18n="signup_button">
+                    Sign Up
+                </button>
+
+                <p style="text-align: center;">
+                    <a href="#" onclick="toggleForms()" data-i18n="signup_login_link">
+                        Already have an account? Login
+                    </a>
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 EduLearn. All rights reserved.</p>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        function toggleForms() {
+            document.getElementById('loginForm').classList.toggle('hidden');
+            document.getElementById('signupForm').classList.toggle('hidden');
+            document.getElementById('loginError').innerHTML = '';
+            document.getElementById('signupError').innerHTML = '';
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                document.getElementById('loginError').innerHTML =
+                    '<div class="error-message">Please fill in all fields</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setToken(data.access_token, data.refresh_token);
+                    showMessage('Login successful');
+                    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                } else {
+                    document.getElementById('loginError').innerHTML =
+                        `<div class="error-message">${data.detail || 'Login failed'}</div>`;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('loginError').innerHTML =
+                    '<div class="error-message">An error occurred. Please try again.</div>';
+            }
+        }
+
+        async function handleSignup() {
+            const firstName = document.getElementById('signupFirstName').value;
+            const lastName = document.getElementById('signupLastName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!firstName || !lastName || !email || !password) {
+                document.getElementById('signupError').innerHTML =
+                    '<div class="error-message">Please fill in all fields</div>';
+                return;
+            }
+
+            if (password.length < 6) {
+                document.getElementById('signupError').innerHTML =
+                    '<div class="error-message">Password must be at least 6 characters</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        email,
+                        phone,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Account created successfully. Please login.');
+                    setTimeout(() => toggleForms(), 2000);
+                } else {
+                    document.getElementById('signupError').innerHTML =
+                        `<div class="error-message">${data.detail || 'Signup failed'}</div>`;
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                document.getElementById('signupError').innerHTML =
+                    '<div class="error-message">An error occurred. Please try again.</div>';
+            }
+        }
+
+        window.addEventListener('load', translatePage);
+
+        if (isAuthenticated()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

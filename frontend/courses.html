@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses - EduLearn</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">📚 EduLearn</div>
+            <ul>
+                <li><a href="index.html" data-i18n="nav_home">Home</a></li>
+                <li><a href="courses.html" data-i18n="nav_courses">Courses</a></li>
+            </ul>
+            <div class="nav-right">
+                <div class="language-toggle">
+                    <button class="btn-outline" onclick="changeLanguage('en')">EN</button>
+                    <button class="btn-outline" onclick="changeLanguage('hi')">HI</button>
+                </div>
+                <div class="auth-buttons">
+                    <button class="btn-outline" onclick="redirectTo('auth.html')" data-i18n="nav_login">Login</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container" style="margin: 2rem auto;">
+        <h1 data-i18n="courses_all">All Courses</h1>
+
+        <div style="display: grid; grid-template-columns: 250px 1fr; gap: 2rem; margin: 2rem 0;">
+            <div style="background: white; padding: 1.5rem; border-radius: 8px; height: fit-content;">
+                <h3 data-i18n="courses_filter">Filter</h3>
+
+                <div class="form-group">
+                    <label data-i18n="courses_subject">Subject</label>
+                    <select id="filterSubject" onchange="applyFilters()">
+                        <option value="">All Subjects</option>
+                        <option value="Math">Math</option>
+                        <option value="Science">Science</option>
+                        <option value="English">English</option>
+                        <option value="History">History</option>
+                        <option value="Geography">Geography</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="courses_board">Board</label>
+                    <select id="filterBoard" onchange="applyFilters()">
+                        <option value="">All Boards</option>
+                        <option value="CBSE">CBSE</option>
+                        <option value="ICSE">ICSE</option>
+                        <option value="State">State Board</option>
+                        <option value="Olympiad">Olympiad</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label data-i18n="courses_grade">Grade Level</label>
+                    <select id="filterGrade" onchange="applyFilters()">
+                        <option value="">All Grades</option>
+                        <option value="3-5">3-5</option>
+                        <option value="6-8">6-8</option>
+                        <option value="9-10">9-10</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <div id="coursesList" class="courses-grid">
+                    <div class="loading"><div class="spinner"></div></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Course Detail Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="courseDetail"></div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 EduLearn. All rights reserved.</p>
+    </footer>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        async function loadCourses() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/courses`);
+                const courses = await response.json();
+                displayCourses(courses);
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                document.getElementById('coursesList').innerHTML =
+                    '<p data-i18n="error_loading">Error loading courses</p>';
+            }
+        }
+
+        function displayCourses(courses) {
+            const container = document.getElementById('coursesList');
+            container.innerHTML = '';
+
+            if (Array.isArray(courses) && courses.length > 0) {
+                courses.forEach(course => {
+                    const card = document.createElement('div');
+                    card.className = 'course-card';
+                    card.innerHTML = `
+                        <div class="course-card-header">
+                            <h3>${course.subject}</h3>
+                        </div>
+                        <div class="course-card-body">
+                            <h4>${course.title}</h4>
+                            <p>${course.description.substring(0, 100)}...</p>
+                            <div class="course-meta">
+                                <span class="badge badge-primary">${course.board}</span>
+                                <span class="badge">${course.grade_level}</span>
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <strong>₹${course.price}</strong>
+                            </div>
+                            <button class="btn-primary" onclick="viewCourseDetail(${course.id})"
+                                style="width: 100%; margin-top: 1rem;" data-i18n="view_details">
+                                View Details
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = '<p style="grid-column: 1/-1;">No courses found</p>';
+            }
+        }
+
+        async function applyFilters() {
+            const subject = document.getElementById('filterSubject').value;
+            const board = document.getElementById('filterBoard').value;
+            const grade = document.getElementById('filterGrade').value;
+
+            let url = `${API_BASE_URL}/courses?`;
+            const params = [];
+            if (subject) params.push(`subject=${subject}`);
+            if (board) params.push(`board=${board}`);
+            if (grade) params.push(`grade_level=${grade}`);
+
+            url += params.join('&');
+
+            try {
+                const response = await fetch(url);
+                const courses = await response.json();
+                displayCourses(courses);
+            } catch (error) {
+                console.error('Error applying filters:', error);
+            }
+        }
+
+        async function viewCourseDetail(courseId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/courses/${courseId}`);
+                const course = await response.json();
+
+                const detail = `
+                    <h2>${course.title}</h2>
+                    <p>${course.description}</p>
+                    <div style="margin: 1rem 0;">
+                        <p><strong>Subject:</strong> ${course.subject}</p>
+                        <p><strong>Board:</strong> ${course.board}</p>
+                        <p><strong>Grade Level:</strong> ${course.grade_level}</p>
+                        <p><strong>Duration:</strong> ${course.duration_hours} hours</p>
+                        <p><strong>Price:</strong> ₹${course.price}</p>
+                    </div>
+                    <button class="btn-primary" onclick="enrollCourse(${course.id})"
+                        style="width: 100%;" data-i18n="course_enroll">
+                        Enroll Now
+                    </button>
+                `;
+                document.getElementById('courseDetail').innerHTML = detail;
+                document.getElementById('courseModal').classList.add('show');
+            } catch (error) {
+                console.error('Error loading course detail:', error);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('courseModal').classList.remove('show');
+        }
+
+        async function enrollCourse(courseId) {
+            if (!isAuthenticated()) {
+                alert('Please login to enroll');
+                redirectTo('auth.html');
+                return;
+            }
+
+            try {
+                const response = await apiCall('/payment/create-order', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        course_id: courseId,
+                        amount: 100 // Get course price from API
+                    })
+                });
+
+                if (response && response.id) {
+                    redirectTo(`checkout.html?payment=${response.id}`);
+                }
+            } catch (error) {
+                console.error('Enrollment error:', error);
+                alert('Error processing enrollment');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            loadCourses();
+            translatePage();
+        });
+    </script>
+</body>
+</html>
