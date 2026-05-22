@@ -3,118 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - EduLearn</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/responsive.css">
-</head>
-<body>
-    <header>
-        <nav>
-            <div class="logo">📚 EduLearn</div>
-            <div class="language-toggle">
-                <button class="btn-outline" onclick="changeLanguage('en')">EN</button>
-                <button class="btn-outline" onclick="changeLanguage('hi')">HI</button>
-            </div>
-        </nav>
-    </header>
-
-    <main>
-        <div class="form-container">
-            <div id="loginForm">
-                <h2 data-i18n="login_title">Welcome Back</h2>
-                <div id="loginError"></div>
-
-                <div class="form-group">
-                    <label data-i18n="login_email">Email</label>
-                    <input type="email" id="loginEmail" placeholder="your@email.com">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="login_password">Password</label>
-                    <input type="password" id="loginPassword" placeholder="••••••••">
-                </div>
-
-                <button class="btn-primary" style="width: 100%; margin-bottom: 1rem;"
-                    onclick="handleLogin()" data-i18n="login_button">
-                    Login
-                </button>
-
-                <p style="text-align: center;">
-                    <a href="#" onclick="toggleForms()" data-i18n="login_signup_link">
-                        Don't have an account? Sign up
-                    </a>
-                </p>
-            </div>
-
-            <div id="signupForm" class="hidden">
-                <h2 data-i18n="signup_title">Create Account</h2>
-                <div id="signupError"></div>
-
-                <div class="form-group">
-                    <label data-i18n="signup_firstname">First Name</label>
-                    <input type="text" id="signupFirstName" placeholder="John">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="signup_lastname">Last Name</label>
-                    <input type="text" id="signupLastName" placeholder="Doe">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="login_email">Email</label>
-                    <input type="email" id="signupEmail" placeholder="your@email.com">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="signup_phone">Phone Number</label>
-                    <input type="tel" id="signupPhone" placeholder="+91 XXXXXXXXXX">
-                </div>
-
-                <div class="form-group">
-                    <label data-i18n="signup_password">Password</label>
-                    <input type="password" id="signupPassword" placeholder="••••••••">
-                </div>
-
-                <button class="btn-primary" style="width: 100%; margin-bottom: 1rem;"
-                    onclick="handleSignup()" data-i18n="signup_button">
-                    Sign Up
-                </button>
-
-                <p style="text-align: center;">
-                    <a href="#" onclick="toggleForms()" data-i18n="signup_login_link">
-                        Already have an account? Login
-                    </a>
-                </p>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 EduLearn. All rights reserved.</p>
-    </footer>
-
-    <script src="js/i18n.js"></script>
-    <script src="js/app.js"></script>
-    <script>
-        function toggleForms() {
-            document.getElementById('loginForm').classList.toggle('hidden');
-            document.getElementById('signupForm').classList.toggle('hidden');
-            document.getElementById('loginError').innerHTML = '';
-            document.getElementById('signupError').innerHTML = '';
+    <title>Login & Sign Up - EduLearn</title>
+    <link rel="stylesheet" href="css/modern.css">
+    <style>
+        .auth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+            background: white;
         }
 
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+        .auth-left {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-            if (!email || !password) {
-                document.getElementById('loginError').innerHTML =
-                    '<div class="error-message">Please fill in all fields</div>';
-                return;
+        .auth-left::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,.1)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,144C672,139,768,149,864,149.3C960,149,1056,139,1152,133.3C1248,128,1344,128,1392,128L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+        }
+
+        .auth-left > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-left h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .auth-left p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .auth-features {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .auth-feature {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .auth-feature-icon {
+            font-size: 2rem;
+        }
+
+        .auth-feature-text h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .auth-feature-text p {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin: 0;
+        }
+
+        .auth-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+            background: #f8fafc;
+        }
+
+        .auth-form-container {
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .auth-toggle button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-radius: 0.4rem;
+            transition: all 0.3s ease;
+        }
+
+        .auth-toggle button.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .auth-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .auth-links {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .error-message,
+        .success-message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #059669;
+        }
+
+        .quick-access-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quick-access-link p {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .quick-login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            color: #1e40af;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .quick-login-btn:hover {
+            background: #e0f2fe;
+            border-color: #7dd3fc;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
             }
 
+            .auth-left {
+                padding: 2rem;
+                min-height: auto;
+                display: none;
+            }
+
+            .auth-right {
+                padding: 2rem;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Side -->
+        <div class="auth-left">
+            <h1>Welcome to EduLearn</h1>
+            <p>Start your learning journey today and unlock your potential</p>
+            
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🚀</div>
+                    <div class="auth-feature-text">
+                        <h4>Quick & Easy</h4>
+                        <p>Sign up in seconds and start learning instantly</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">📚</div>
+                    <div class="auth-feature-text">
+                        <h4>10+ Courses</h4>
+                        <p>Access hundreds of expertly curated courses</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🎯</div>
+                    <div class="auth-feature-text">
+                        <h4>AI Personalized</h4>
+                        <p>Get personalized learning recommendations</p>
+                    </div>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🏆</div>
+                    <div class="auth-feature-text">
+                        <h4>Earn Certificates</h4>
+                        <p>Get recognized credentials upon completion</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="auth-right">
+            <div class="auth-form-container">
+                <div class="auth-toggle">
+                    <button class="active" id="loginTab" onclick="switchTab('login')">🔓 Login</button>
+                    <button id="signupTab" onclick="switchTab('signup')">✍️ Sign Up</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div id="loginMessage"></div>
+                    
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" required placeholder="your@email.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter your password" autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="auth-submit" id="loginBtn">🚀 Login</button>
+
+                    <div class="auth-links">
+                        <p>Don't have an account? <a onclick="switchTab('signup'); return false;">Sign up here</a></p>
+                    </div>
+
+                    <!-- Quick Access -->
+                    <div class="quick-access-link">
+                        <p>⚡ Quick Demo Access:</p>
+                        <button type="button" class="quick-login-btn" onclick="quickLogin('student@edulearn.com', 'Student@123'); return false;">
+                            👤 Student Demo
+                        </button>
+                        <button type="button" class="quick-login-btn" onclick="quickLogin('teacher@edulearn.com', 'Teacher@123'); return false;">
+                            👨‍🏫 Teacher Demo
+                        </button>
+                        <button type="button" class="quick-login-btn" onclick="quickLogin('admin@edulearn.com', 'Admin@123'); return false;">
+                            🔐 Admin Demo
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form id="signupForm" style="display: none;" onsubmit="handleSignup(event)">
+                    <div id="signupMessage"></div>
+                    
+                    <div class="form-group">
+                        <label for="signupEmail">Email Address</label>
+                        <input type="email" id="signupEmail" required placeholder="your@email.com" autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupFirstName">First Name</label>
+                        <input type="text" id="signupFirstName" required placeholder="John" autocomplete="given-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupLastName">Last Name</label>
+                        <input type="text" id="signupLastName" required placeholder="Doe" autocomplete="family-name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" required placeholder="Min 6 characters" autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupConfirmPassword">Confirm Password</label>
+                        <input type="password" id="signupConfirmPassword" required placeholder="Confirm password" autocomplete="new-password">
+                    </div>
+
+                    <button type="submit" class="auth-submit" id="signupBtn">✅ Create Account</button>
+
+                    <div class="auth-links">
+                        <p>Already have an account? <a onclick="switchTab('login'); return false;">Login here</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                signupForm.style.display = 'none';
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                document.getElementById('loginEmail').focus();
+            } else {
+                loginForm.style.display = 'none';
+                signupForm.style.display = 'block';
+                loginTab.classList.remove('active');
+                signupTab.classList.add('active');
+                document.getElementById('signupEmail').focus();
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const messageEl = document.getElementById('loginMessage');
+            const btn = document.getElementById('loginBtn');
+
+            messageEl.innerHTML = '';
+            btn.disabled = true;
+            btn.textContent = '⏳ Logging in...';
+
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                const response = await fetch(`${API_BASE}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
@@ -122,74 +420,92 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    setToken(data.access_token, data.refresh_token);
-                    showMessage('Login successful');
-                    setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                if (response.ok && data.access_token) {
+                    localStorage.setItem('token', data.access_token);
+                    localStorage.setItem('user', JSON.stringify(data.user || { email }));
+                    messageEl.innerHTML = '<div class="success-message">✅ Login successful! Redirecting...</div>';
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 800);
                 } else {
-                    document.getElementById('loginError').innerHTML =
-                        `<div class="error-message">${data.detail || 'Login failed'}</div>`;
+                    messageEl.innerHTML = `<div class="error-message">❌ ${data.detail || 'Login failed'}</div>`;
                 }
             } catch (error) {
-                console.error('Login error:', error);
-                document.getElementById('loginError').innerHTML =
-                    '<div class="error-message">An error occurred. Please try again.</div>';
+                messageEl.innerHTML = `<div class="error-message">❌ Server connection error</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Login';
             }
         }
 
-        async function handleSignup() {
+        async function handleSignup(event) {
+            event.preventDefault();
+            const email = document.getElementById('signupEmail').value;
             const firstName = document.getElementById('signupFirstName').value;
             const lastName = document.getElementById('signupLastName').value;
-            const email = document.getElementById('signupEmail').value;
-            const phone = document.getElementById('signupPhone').value;
             const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            const messageEl = document.getElementById('signupMessage');
+            const btn = document.getElementById('signupBtn');
 
-            if (!firstName || !lastName || !email || !password) {
-                document.getElementById('signupError').innerHTML =
-                    '<div class="error-message">Please fill in all fields</div>';
+            if (password !== confirmPassword) {
+                messageEl.innerHTML = '<div class="error-message">❌ Passwords do not match!</div>';
                 return;
             }
 
             if (password.length < 6) {
-                document.getElementById('signupError').innerHTML =
-                    '<div class="error-message">Password must be at least 6 characters</div>';
+                messageEl.innerHTML = '<div class="error-message">❌ Password must be at least 6 characters</div>';
                 return;
             }
 
+            messageEl.innerHTML = '';
+            btn.disabled = true;
+            btn.textContent = '⏳ Creating account...';
+
             try {
-                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                const response = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        email,
+                        password,
                         first_name: firstName,
                         last_name: lastName,
-                        email,
-                        phone,
-                        password
+                        role: 'student'
                     })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('Account created successfully. Please login.');
-                    setTimeout(() => toggleForms(), 2000);
+                    messageEl.innerHTML = '<div class="success-message">✅ Account created! Logging you in...</div>';
+                    setTimeout(() => {
+                        document.getElementById('loginEmail').value = email;
+                        document.getElementById('loginPassword').value = password;
+                        handleLogin({ preventDefault: () => {} });
+                    }, 1000);
                 } else {
-                    document.getElementById('signupError').innerHTML =
-                        `<div class="error-message">${data.detail || 'Signup failed'}</div>`;
+                    messageEl.innerHTML = `<div class="error-message">❌ ${data.detail || 'Signup failed'}</div>`;
                 }
             } catch (error) {
-                console.error('Signup error:', error);
-                document.getElementById('signupError').innerHTML =
-                    '<div class="error-message">An error occurred. Please try again.</div>';
+                messageEl.innerHTML = `<div class="error-message">❌ Server connection error</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '✅ Create Account';
             }
         }
 
-        window.addEventListener('load', translatePage);
-
-        if (isAuthenticated()) {
-            window.location.href = 'dashboard.html';
+        function quickLogin(email, password) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = password;
+            const event = { preventDefault: () => {} };
+            handleLogin(event);
         }
+
+        // Focus on first input on load
+        window.addEventListener('load', () => {
+            document.getElementById('loginEmail').focus();
+        });
     </script>
 </body>
 </html>
