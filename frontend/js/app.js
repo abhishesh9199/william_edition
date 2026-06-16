@@ -1,4 +1,4 @@
-const API_BASE_URL = localStorage.getItem('apiUrl') || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
+const API_BASE_URL = localStorage.getItem('apiUrl') || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://william-edition.onrender.com');
 
 function redirectTo(page) {
     window.location.href = page;
