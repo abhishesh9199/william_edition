@@ -1,4 +1,4 @@
-const API_BASE_URL = localStorage.getItem('apiUrl') || 'http://localhost:8000';
+const API_BASE_URL = localStorage.getItem('apiUrl') || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : '');
 
 function redirectTo(page) {
     window.location.href = page;
