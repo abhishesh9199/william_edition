@@ -5,7 +5,8 @@ import os
 
 from database.db import engine
 from database.models import Base
-from routes import auth, user, courses, payment
+from routes import auth, user, courses
+# from routes import payment  # Temporarily disabled due to missing dependency
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,7 +31,7 @@ def health_check():
 app.include_router(auth.router)
 app.include_router(user.router)
 app.include_router(courses.router)
-app.include_router(payment.router)
+# app.include_router(payment.router)  # Temporarily disabled
 
 if __name__ == "__main__":
     import uvicorn
